@@ -1,0 +1,16 @@
+.btn {
+  display: block;
+  height: 26px;
+  line-height: 26px;
+  cursor: pointer;
+  margin: 0 auto 6px;
+  background-color: #fff;
+  color: #000;
+  border: 1px solid #aaa;
+  border-radius: 6px;
+  transition: all .2s;
+}
+
+.score {
+  color: green;
+}

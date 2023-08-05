@@ -1,0 +1,27 @@
+.game-area-wrap {
+  width: 500px;
+  height: 500px;
+  border: 2px solid grey;
+  overflow: hidden;
+  position: relative;
+}
+
+.game-area-wrap .snake-item{
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  overflow: hidden;
+  text-indent: -9999px;
+  background-color: #000;
+}
+
+.game-area-wrap .snake-item, .head-color {
+  background-color: gray;
+}
+.game-area-wrap .food{
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  overflow: hidden;
+  text-indent: -9999px;
+}
