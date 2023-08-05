@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import utils from '../../utils.js';
 import GameController from './GameController/index.jsx';
 import styles from './style.module.css'
@@ -7,10 +7,10 @@ const DEFAULT_FOOD_COLOR = '#000';
 const DEFAULT_SNAKE_POSITION = {"toTop": 0, "toLeft": 0};
 
 const SNAKE_MOVE_DIRECTION = {
-    "RIGHT": 37,
-    "BOTTOM": 38,
-    "LEFT": 39,
-    "TOP": 40,
+    "RIGHT": 39,
+    "BOTTOM": 40,
+    "LEFT": 37,
+    "TOP": 38,
 }
 
 const GAME_AREA = {
@@ -21,10 +21,10 @@ const GAME_AREA = {
 }
 
 const SPEED = {
-    "EASY": 2000,
-    "NORMAL": 1500,
-    "HARD": 1000,
-    "KUAI": 400
+    "EASY": 200,
+    "NORMAL": 150,
+    "HARD": 100,
+    "KUAI": 40
 }
 const defaultSnake = {
   positions: [DEFAULT_SNAKE_POSITION],
@@ -38,6 +38,7 @@ function GameArea() {
         color: DEFAULT_FOOD_COLOR
     });
     const [snake, setSnake] = useState(defaultSnake)
+    const snakeDirectioin = useRef(snake.direction);
     const [score, setScore] = useState(0);
     const [gameDifficulty, setGameDifficulty] = useState(SPEED.NORMAL);
     const [timeInterval, setTimeInterval] = useState(null);
@@ -58,8 +59,6 @@ function GameArea() {
 
     const startGame = () => {
         const snakeAnimation = setInterval(() => {
-          console.log('snakeAnimation', snakeAnimation)
-          console.log('snake.direction', snake.direction)
           if (snakeBeKilled()) {
             // 游戏结束
             gameOver()
@@ -84,10 +83,11 @@ function GameArea() {
         //  注意：这里由于是放在setInterval里面的，所以这里的snake是旧的，不是最新的
         // ............................
         //  这里是真的坑人....
-        console.log('snake', snake)
-        if (snake.direction === SNAKE_MOVE_DIRECTION.RIGHT) {
+        console.log('snakeDirectioin.current', snakeDirectioin.current)
+        if (snakeDirectioin.current === SNAKE_MOVE_DIRECTION.RIGHT) {
             console.log('向RIGHT走')
             setSnake(prev => {
+              console.log('prev', prev)
               prev.positions.push({
                 toTop: prev.positions[prev.positions.length - 1].toTop,
                 toLeft: prev.positions[prev.positions.length - 1].toLeft + 10
@@ -98,7 +98,7 @@ function GameArea() {
               return newSnake;
             })
         }
-        else if (snake.direction === SNAKE_MOVE_DIRECTION.LEFT) {
+        else if (snakeDirectioin.current === SNAKE_MOVE_DIRECTION.LEFT) {
           console.log('向LEFT走')
           setSnake(prev => {
             prev.positions.push({
@@ -111,7 +111,7 @@ function GameArea() {
             return newSnake;
           })
         }
-        else if (snake.direction === SNAKE_MOVE_DIRECTION.BOTTOM) {
+        else if (snakeDirectioin.current === SNAKE_MOVE_DIRECTION.BOTTOM) {
           console.log('向BOTTOM走')
           setSnake(prev => {
             prev.positions.push({
@@ -124,7 +124,7 @@ function GameArea() {
             return newSnake;
           })
         }
-        else if (snake.direction === SNAKE_MOVE_DIRECTION.TOP) {
+        else if (snakeDirectioin.current === SNAKE_MOVE_DIRECTION.TOP) {
           console.log('向TOP走')
           setSnake(prev => {
             prev.positions.push({
@@ -142,12 +142,13 @@ function GameArea() {
     const controlSnakeMove = () => {
         window.onkeydown = e => {
             const keyCode = e.keyCode;
-            
+            console.log('keyCode', keyCode)
+            snakeDirectioin.current = Object.entries(SNAKE_MOVE_DIRECTION).find(([, value]) => value === keyCode)[1]
             setSnake(prev =>  {
-              prev.direction = Object.entries(SNAKE_MOVE_DIRECTION).find(([, value]) => value === keyCode)[1]
+              
               return {
                 ...prev,
-                direction: Object.entries(SNAKE_MOVE_DIRECTION).find(([, value]) => value === keyCode)[1],
+                direction: snakeDirectioin.current
               }
             })
         }
