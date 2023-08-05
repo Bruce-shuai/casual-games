@@ -21,9 +21,9 @@ const GAME_AREA = {
 }
 
 const SPEED = {
-    "EASY": 100,
-    "NORMAL": 200,
-    "HARD": 300,
+    "EASY": 2000,
+    "NORMAL": 1500,
+    "HARD": 1000,
     "KUAI": 400
 }
 const defaultSnake = {
@@ -45,15 +45,21 @@ function GameArea() {
       randomFood();
       controlSnakeMove();
       clearInterval(timeInterval);
-      // setSnake(defaultSnake);
+      setSnake(prev => {
+        
+        return {
+          ...prev,
+          direction: SNAKE_MOVE_DIRECTION.RIGHT,
+          positions: [DEFAULT_SNAKE_POSITION],
+          renderTest: 0
+        };
+      });
     }
-    // 由于snake是对象，所以postion的变化不会触发渲染
-    useEffect(() => {
-
-    }, [snake.positions])
 
     const startGame = () => {
         const snakeAnimation = setInterval(() => {
+          console.log('snakeAnimation', snakeAnimation)
+          console.log('snake.direction', snake.direction)
           if (snakeBeKilled()) {
             // 游戏结束
             gameOver()
@@ -71,15 +77,16 @@ function GameArea() {
         clearInterval(timeInterval);
         initGame();
     }
-
+    
+    
     const snakeMove = () => {
-        
-        const snakeHead = snake.positions.length - 1;
-        const snakeHeadToTop = snake.positions[snakeHead].toTop;
-        const snakeHeadToLeft = snake.positions[snakeHead].toLeft;
-        
-        const newSnakeHead = {}
+        // .............................
+        //  注意：这里由于是放在setInterval里面的，所以这里的snake是旧的，不是最新的
+        // ............................
+        //  这里是真的坑人....
+        console.log('snake', snake)
         if (snake.direction === SNAKE_MOVE_DIRECTION.RIGHT) {
+            console.log('向RIGHT走')
             setSnake(prev => {
               prev.positions.push({
                 toTop: prev.positions[prev.positions.length - 1].toTop,
@@ -88,50 +95,60 @@ function GameArea() {
               prev.positions.shift();
               const newSnake = {...prev};
               newSnake.renderTest = prev.renderTest + 1;
-              console.log('newSnake', newSnake)
               return newSnake;
             })
         }
         else if (snake.direction === SNAKE_MOVE_DIRECTION.LEFT) {
-            
-          setSnake(prev =>  {
-            newSnakeHead.toTop = snakeHeadToTop
-            newSnakeHead.toLeft = snakeHeadToLeft - 10
-            prev.positions.push(newSnakeHead);
-            prev.positions.shift();
-            return prev;
+          console.log('向LEFT走')
+          setSnake(prev => {
+            prev.positions.push({
+              toTop: prev.positions[prev.positions.length - 1].toTop,
+              toLeft: prev.positions[prev.positions.length - 1].toLeft - 10
             })
+            prev.positions.shift();
+            const newSnake = {...prev};
+            newSnake.renderTest = prev.renderTest + 1;
+            return newSnake;
+          })
         }
         else if (snake.direction === SNAKE_MOVE_DIRECTION.BOTTOM) {
-            setSnake(prev =>  {
-              newSnakeHead.toTop = snakeHeadToTop + 10
-              newSnakeHead.toLeft = snakeHeadToLeft
-              prev.positions.push(newSnakeHead);
-              prev.positions.shift();
-              return prev;
+          console.log('向BOTTOM走')
+          setSnake(prev => {
+            prev.positions.push({
+              toTop: prev.positions[prev.positions.length - 1].toTop + 10,
+              toLeft: prev.positions[prev.positions.length - 1].toLeft
             })
+            prev.positions.shift();
+            const newSnake = {...prev};
+            newSnake.renderTest = prev.renderTest + 1;
+            return newSnake;
+          })
         }
         else if (snake.direction === SNAKE_MOVE_DIRECTION.TOP) {
-            setSnake(prev => {
-              newSnakeHead.toTop = snakeHeadToTop - 10
-              newSnakeHead.toLeft = snakeHeadToLeft
-              prev.positions.push(newSnakeHead);
-            prev.positions.shift();
-            return prev;
+          console.log('向TOP走')
+          setSnake(prev => {
+            prev.positions.push({
+              toTop: prev.positions[prev.positions.length - 1].toTop - 10,
+              toLeft: prev.positions[prev.positions.length - 1].toLeft
             })
+            prev.positions.shift();
+            const newSnake = {...prev};
+            newSnake.renderTest = prev.renderTest + 1;
+            return newSnake;
+          })
         }
     }
 
     const controlSnakeMove = () => {
         window.onkeydown = e => {
             const keyCode = e.keyCode;
-            const snakeNextDirection = Object.entries(SNAKE_MOVE_DIRECTION).find(([, value]) => value === keyCode);
+            
             setSnake(prev =>  {
+              prev.direction = Object.entries(SNAKE_MOVE_DIRECTION).find(([, value]) => value === keyCode)[1]
               return {
                 ...prev,
-                direction: snakeNextDirection
+                direction: Object.entries(SNAKE_MOVE_DIRECTION).find(([, value]) => value === keyCode)[1],
               }
-
             })
         }
     }
@@ -214,10 +231,12 @@ function GameArea() {
    return (
     <div>
       <GameController handlePlay={() => {
+        console.log('点击开始')
         initGame();
         startGame();
       }} score={score} gameDifficulty={gameDifficulty} handleGameDifficulty={(e) => setGameDifficulty(e.target.value)}/>
-      <div>{snake.renderTest}</div>
+      <div>renderTest{snake.renderTest}</div>
+      <div>direction{snake.direction}</div>
       <div className={styles['game-area-wrap']}>
       {
         snake.positions.map((item, index) => {
